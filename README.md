@@ -1,6 +1,6 @@
-# IFAST — local speed test
+# IFAST
 
-Minimal local speed-test (fast.com style) with zero dependencies.
+Local network diagnostics and speed test for quick troubleshooting.
 
 ## Run from source
 Requires Node.js 18+.
@@ -42,6 +42,6 @@ Output file: `dist/ifast.exe`
 - Double-click to start
 - Open `http://localhost:3000` in a browser
 
-## Note
-Local test measures speed to the machine running the server.
-For LAN testing between two PCs, run the server on one and open the page from the other.
+## Notes
+- The speed test measures the connection to the machine running the server.
+- For LAN testing between two PCs, run the server on one and open the page from the other.
