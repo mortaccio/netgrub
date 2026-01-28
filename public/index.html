@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>IFAST — Local Network Diagnostics</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="noise"></div>
+    <header class="top">
+      <div class="brand">IFAST</div>
+      <div class="tagline">Local network diagnostics and speed test.</div>
+    </header>
+
+    <main class="panel">
+      <section class="hero">
+        <div class="hero-header">
+        <div class="hero-title">IFAST MONITOR</div>
+          <div class="hero-sub">Speed and network health, one view</div>
+        </div>
+        <div class="hero-speed">
+          <span class="speed-label">LIVE</span>
+          <span class="speed-value" id="speedValue">—</span>
+          <span class="speed-unit">Mbps</span>
+        </div>
+        <div class="phase" id="phase">Ready</div>
+        <div class="hero-actions">
+          <button class="cta" id="startBtn">Start</button>
+          <button class="ghost" id="stopBtn" disabled>Stop</button>
+        </div>
+      </section>
+
+      <section class="stats">
+        <div class="stat">
+          <div class="label">Ping</div>
+          <div class="metric"><span id="pingValue">—</span> ms</div>
+        </div>
+        <div class="stat">
+          <div class="label">Jitter</div>
+          <div class="metric"><span id="jitterValue">—</span> ms</div>
+        </div>
+        <div class="stat">
+          <div class="label">Public IP</div>
+          <div class="metric"><span id="publicIpValue">—</span></div>
+        </div>
+        <div class="stat">
+          <div class="label">Download</div>
+          <div class="metric"><span id="downValue">—</span> Mbps</div>
+        </div>
+        <div class="stat">
+          <div class="label">Upload</div>
+          <div class="metric"><span id="upValue">—</span> Mbps</div>
+        </div>
+        <div class="stat stat-wide">
+          <div class="label">Session</div>
+          <div class="metric" id="sessionValue">—</div>
+        </div>
+      </section>
+    </main>
+
+    <section class="extras">
+      <details open class="extra-card">
+        <summary>Details</summary>
+        <div class="extra-grid">
+          <div class="extra-block">
+            <div class="label">System</div>
+            <div class="mini" id="systemValue">—</div>
+            <div class="label">Local IPs</div>
+            <div class="mini" id="ipValue">—</div>
+            <div class="label">ISP</div>
+            <div class="mini" id="ispValue">—</div>
+          </div>
+          <div class="extra-block">
+            <div class="label">Traceroute</div>
+            <div class="trace-controls">
+              <div class="field">
+                <label for="traceHost">Host</label>
+                <input id="traceHost" type="text" value="1.1.1.1" />
+              </div>
+              <div class="field">
+                <label for="traceHops">Hops</label>
+                <input id="traceHops" type="number" min="5" max="40" value="20" />
+              </div>
+              <div class="field">
+                <label for="traceTimeout">Timeout, ms</label>
+                <input id="traceTimeout" type="number" min="500" max="5000" value="2000" />
+              </div>
+              <button class="ghost" id="traceBtn">Run</button>
+            </div>
+            <pre class="trace-output" id="traceOutput">—</pre>
+          </div>
+          <div class="extra-block">
+            <div class="label">Network Summary</div>
+            <div class="summary-quality" id="summaryQuality">
+              <span class="summary-dot"></span>
+              <span class="summary-text">Quality: —</span>
+            </div>
+            <div class="summary-list">
+              <div class="summary-item">
+                <span class="summary-key">Public IP</span>
+                <span class="summary-val" id="summaryPublicIp">—</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-key">Gateway</span>
+                <span class="summary-val" id="summaryGateway">—</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-key">DNS</span>
+                <span class="summary-val" id="summaryDns">—</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-key">Ping</span>
+                <span class="summary-val" id="summaryPing">—</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-key">Speed</span>
+                <span class="summary-val" id="summarySpeed">—</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-key">Updated</span>
+                <span class="summary-val" id="summaryUpdated">—</span>
+              </div>
+            </div>
+          </div>
+          <div class="extra-block extra-wide">
+            <div class="label">Troubleshooting</div>
+            <div class="ts-grid">
+              <div class="ts-card" id="tsLocal">
+                <div class="ts-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 6h16v8H4z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M8 18h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <circle cx="12" cy="11" r="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                  </svg>
+                </div>
+                <div class="ts-title">PC → Router</div>
+                <div class="ts-status">—</div>
+              </div>
+              <div class="ts-card" id="tsInternet">
+                <div class="ts-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M4.5 12h15M12 4.5c2.2 2.5 2.2 12.5 0 15M12 4.5c-2.2 2.5-2.2 12.5 0 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div class="ts-title">Router → Internet</div>
+                <div class="ts-status">—</div>
+              </div>
+              <div class="ts-card" id="tsDns">
+                <div class="ts-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="11" cy="11" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M16 16l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <div class="ts-title">DNS</div>
+                <div class="ts-status">—</div>
+              </div>
+              <div class="ts-card" id="tsHttp">
+                <div class="ts-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 12h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M12 4v16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                  </svg>
+                </div>
+                <div class="ts-title">HTTP</div>
+                <div class="ts-status">—</div>
+              </div>
+              <button class="cta" id="troubleshootBtn">Run Checks</button>
+            </div>
+            <pre class="trace-output" id="troubleshootOutput">—</pre>
+          </div>
+          <div class="extra-block extra-wide">
+            <div class="label">Full Diagnostics</div>
+            <div class="mini">System command outputs (may include sensitive info)</div>
+            <div class="diag-head">
+              <button class="ghost" id="diagBtn">Load Diagnostics</button>
+              <div class="mini" id="diagStatus">—</div>
+            </div>
+            <div class="diag-summary">
+              <div class="diag-item">
+                <div class="label">Gateway</div>
+                <div class="mini" id="diagGateway">—</div>
+              </div>
+              <div class="diag-item">
+                <div class="label">DNS</div>
+                <div class="mini" id="diagDns">—</div>
+              </div>
+              <div class="diag-item">
+                <div class="label">Interfaces</div>
+                <div class="mini" id="diagIfaces">—</div>
+              </div>
+            </div>
+            <div class="diag-outputs" id="diagOutputs"></div>
+          </div>
+          <div class="extra-block extra-wide">
+            <div class="label">Network (raw)</div>
+            <pre class="trace-output" id="netinfoOutput">—</pre>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <footer class="foot">
+      <span>Local server: data stays on your device.</span>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>

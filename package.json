@@ -1,0 +1,41 @@
+{
+  "name": "ifast-local",
+  "version": "0.1.0",
+  "description": "Local internet speed test (fast.com-style) with zero deps",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "node server.js",
+    "build:win": "npx pkg . --targets node18-win-x64 --output dist/ifast.exe",
+    "desktop": "electron .",
+    "desktop:dist": "electron-builder --win portable"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": "server.js",
+  "pkg": {
+    "assets": [
+      "public/**/*"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3",
+    "pkg": "^5.8.1"
+  },
+  "build": {
+    "appId": "local.ifast.desktop",
+    "productName": "IFAST Desktop",
+    "asar": false,
+    "files": [
+      "electron/**/*",
+      "public/**/*",
+      "server.js",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable"
+    }
+  }
+}
