@@ -37,10 +37,26 @@ npm run build:win
 
 Output file: `dist/ifast.exe`
 
-## How friends run it (Windows)
+## How to run it (Windows)
 - They get `ifast.exe`
 - Double-click to start
 - Open `http://localhost:3000` in a browser
+
+## PWA (GitHub Pages)
+This is a pure PWA build that runs without Node on the client. It must be hosted
+over HTTPS (GitHub Pages works).
+
+1) Copy the static files to `docs/`:
+```
+mkdir -p docs
+cp -R public/. docs/
+touch docs/.nojekyll
+```
+
+2) Push to GitHub, then enable Pages:
+- Repo Settings → Pages → Source: `main` branch, folder `/docs`
+
+Your app will be at: `https://<user>.github.io/<repo>/`
 
 ## Notes
 - Speed test traffic goes to Cloudflare's public edge endpoints.

@@ -1,0 +1,18 @@
+{
+  "name": "IFAST — Local Network Diagnostics",
+  "short_name": "IFAST",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#050806",
+  "theme_color": "#050806",
+  "description": "Local network diagnostics and speed test.",
+  "categories": ["utilities", "productivity", "network"],
+  "icons": [
+    {
+      "src": "logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ]
+}
