@@ -50,6 +50,8 @@ const PUBLIC_IP_ENDPOINTS = [
   { url: "https://api64.ipify.org?format=json" },
   { url: "https://ifconfig.co/json", headers: { Accept: "application/json" } },
   { url: "https://ipapi.co/json/" },
+  { url: "https://api.myip.com" },
+  { url: "https://myip.is/json" },
 ];
 
 let latencyProvider = {
@@ -400,28 +402,36 @@ async function loadPublicIp() {
     const data = await fetchPublicIp();
     publicIpValue.textContent = data.ip || "—";
     summaryPublicIp.textContent = data.ip || "—";
+    publicIpValue.removeAttribute("title");
   } catch (err) {
-    publicIpValue.textContent = "—";
+    publicIpValue.textContent = "Blocked";
     summaryPublicIp.textContent = "—";
+    publicIpValue.title = String(err?.message || err || "Public IP unavailable");
   }
 }
 
 async function fetchPublicIp() {
+  const errors = [];
   for (const endpoint of PUBLIC_IP_ENDPOINTS) {
     try {
       const res = await fetch(endpoint.url, {
         cache: "no-store",
         headers: endpoint.headers || undefined,
       });
-      if (!res.ok) continue;
+      if (!res.ok) {
+        errors.push(`${endpoint.url} ${res.status}`);
+        continue;
+      }
       const data = await res.json();
       const ip = data.ip || data.IP || data.address;
       if (ip) return { ip };
+      errors.push(`${endpoint.url} invalid payload`);
     } catch {
+      errors.push(`${endpoint.url} failed`);
       continue;
     }
   }
-  throw new Error("Public IP unavailable");
+  throw new Error(`Public IP unavailable: ${errors.join(" | ")}`);
 }
 
 function updateSummary() {
