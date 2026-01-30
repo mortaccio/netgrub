@@ -1,12 +1,12 @@
 {
-  "name": "IFAST — Local Network Diagnostics",
-  "short_name": "IFAST",
+  "name": "Netgrubber — Network Speed Monitor",
+  "short_name": "Netgrubber",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#050806",
   "theme_color": "#050806",
-  "description": "Local network diagnostics and speed test.",
+  "description": "Network speed monitor and quality snapshot.",
   "categories": ["utilities", "productivity", "network"],
   "icons": [
     {
