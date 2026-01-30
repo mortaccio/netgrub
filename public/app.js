@@ -8,37 +8,13 @@ const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
 const sessionValue = document.getElementById("sessionValue");
 const jitterValue = document.getElementById("jitterValue");
-const systemValue = document.getElementById("systemValue");
-const ipValue = document.getElementById("ipValue");
-const ispValue = document.getElementById("ispValue");
 const publicIpValue = document.getElementById("publicIpValue");
-const traceHost = document.getElementById("traceHost");
-const traceHops = document.getElementById("traceHops");
-const traceTimeout = document.getElementById("traceTimeout");
-const traceBtn = document.getElementById("traceBtn");
-const traceOutput = document.getElementById("traceOutput");
-const netinfoOutput = document.getElementById("netinfoOutput");
-const troubleshootBtn = document.getElementById("troubleshootBtn");
-const troubleshootOutput = document.getElementById("troubleshootOutput");
-const tsLocal = document.getElementById("tsLocal");
-const tsInternet = document.getElementById("tsInternet");
-const tsDns = document.getElementById("tsDns");
-const tsHttp = document.getElementById("tsHttp");
-const diagBtn = document.getElementById("diagBtn");
-const diagStatus = document.getElementById("diagStatus");
-const diagGateway = document.getElementById("diagGateway");
-const diagDns = document.getElementById("diagDns");
-const diagIfaces = document.getElementById("diagIfaces");
-const diagOutputs = document.getElementById("diagOutputs");
 const summaryQuality = document.getElementById("summaryQuality");
 const summaryPublicIp = document.getElementById("summaryPublicIp");
-const summaryGateway = document.getElementById("summaryGateway");
-const summaryDns = document.getElementById("summaryDns");
 const summaryPing = document.getElementById("summaryPing");
 const summarySpeed = document.getElementById("summarySpeed");
 const summaryUpdated = document.getElementById("summaryUpdated");
 const summaryLatencyTarget = document.getElementById("summaryLatencyTarget");
-const summaryIcmp = document.getElementById("summaryIcmp");
 const monitorStatus = document.getElementById("monitorStatus");
 const monitorStartBtn = document.getElementById("monitorStartBtn");
 const monitorStopBtn = document.getElementById("monitorStopBtn");
@@ -47,26 +23,10 @@ const monitorAvg = document.getElementById("monitorAvg");
 const monitorLoss = document.getElementById("monitorLoss");
 const monitorSamples = document.getElementById("monitorSamples");
 const monitorSpark = document.getElementById("monitorSpark");
-const assistantSymptom = document.getElementById("assistantSymptom");
-const assistantHost = document.getElementById("assistantHost");
-const assistantRunBtn = document.getElementById("assistantRunBtn");
-const assistantCopyBtn = document.getElementById("assistantCopyBtn");
-const assistantOutput = document.getElementById("assistantOutput");
 const speedRating = document.getElementById("speedRating");
 const speedStars = document.getElementById("speedStars");
 const speedAdvice = document.getElementById("speedAdvice");
 const speedUse = document.getElementById("speedUse");
-const providerBtn = document.getElementById("providerBtn");
-const providerOutput = document.getElementById("providerOutput");
-const finderHost = document.getElementById("finderHost");
-const finderRunBtn = document.getElementById("finderRunBtn");
-const finderCopyBtn = document.getElementById("finderCopyBtn");
-const finderOutput = document.getElementById("finderOutput");
-const autoDiagStatus = document.getElementById("autoDiagStatus");
-const autoDiagList = document.getElementById("autoDiagList");
-const localStatus = document.getElementById("localStatus");
-const ispStatus = document.getElementById("ispStatus");
-const splitHint = document.getElementById("splitHint");
 const historyGrid = document.getElementById("historyGrid");
 const footerNote = document.getElementById("footerNote");
 
@@ -80,14 +40,10 @@ const MBITS = 1_000_000;
 const HISTORY_KEY = "ifastHistory";
 const HISTORY_LIMIT = 14;
 const REMOTE_TEST_BASE = "https://speed.cloudflare.com";
-const PING_BYTES = 20000;
 const DOWNLOAD_RUNS_MB = [10, 25, 50];
 const UPLOAD_RUNS_MB = [5, 10];
-const MONITOR_BYTES = 8000;
 const MONITOR_INTERVAL_MS = 300;
 const LATENCY_FALLBACK_URL = "https://speed.cloudflare.com/__down?bytes=20000";
-const BACKEND_ENABLED = false;
-const PWA_UNAVAILABLE_TEXT = "Unavailable in PWA (requires local server).";
 const PUBLIC_IP_ENDPOINT = "https://api.ipify.org?format=json";
 
 let latencyProvider = {
@@ -128,112 +84,10 @@ function formatMs(value) {
   return Math.round(value).toString();
 }
 
-function escapeHtml(text) {
-  return text
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
-function classifyLine(line) {
-  const lower = line.toLowerCase();
-  if (
-    lower.includes("error") ||
-    lower.includes("fail") ||
-    lower.includes("timeout") ||
-    lower.includes("no response") ||
-    lower.includes("unreachable") ||
-    lower.includes("packet loss") ||
-    lower.includes("issue detected") ||
-    lower.includes("blocked")
-  ) {
-    return "out-bad";
-  }
-  if (
-    lower.includes("warn") ||
-    lower.includes("unstable") ||
-    lower.includes("high") ||
-    lower.includes("slow") ||
-    lower.includes("loss")
-  ) {
-    return "out-warn";
-  }
-  if (lower.includes("ok") || lower.includes("ready")) {
-    return "out-ok";
-  }
-  return "";
-}
-
-function renderLines(preEl, lines) {
-  preEl.innerHTML = lines
-    .map((line) => {
-      const cls = classifyLine(line);
-      const safe = escapeHtml(line);
-      return cls
-        ? `<span class="out-line ${cls}">${safe}</span>`
-        : `<span class="out-line">${safe}</span>`;
-    })
-    .join("\n");
-}
-
 function setStatus(el, text, level) {
   el.textContent = text;
   el.classList.remove("out-ok", "out-warn", "out-bad");
   if (level) el.classList.add(level);
-}
-
-function markUnavailable(el, text = PWA_UNAVAILABLE_TEXT) {
-  if (!el) return;
-  el.textContent = text;
-  if (el.classList) {
-    el.classList.remove("out-ok", "out-warn");
-    el.classList.add("out-bad");
-  }
-}
-
-function disableBackendButton(btn, label = "Disabled in PWA") {
-  if (!btn) return;
-  btn.disabled = true;
-  btn.title = label;
-}
-
-function applyPurePwaMode() {
-  latencyProvider = { name: "Cloudflare speed (default)", url: LATENCY_FALLBACK_URL };
-  const note =
-    "PWA mode: speed test works in-browser; local diagnostics need a server.";
-  if (footerNote) footerNote.textContent = note;
-
-  systemValue.textContent = PWA_UNAVAILABLE_TEXT;
-  ipValue.textContent = PWA_UNAVAILABLE_TEXT;
-  ispValue.textContent = PWA_UNAVAILABLE_TEXT;
-  summaryGateway.textContent = PWA_UNAVAILABLE_TEXT;
-  summaryDns.textContent = PWA_UNAVAILABLE_TEXT;
-  summaryIcmp.textContent = PWA_UNAVAILABLE_TEXT;
-  netinfoOutput.textContent = PWA_UNAVAILABLE_TEXT;
-  diagStatus.textContent = PWA_UNAVAILABLE_TEXT;
-  diagGateway.textContent = "—";
-  diagDns.textContent = "—";
-  diagIfaces.textContent = "—";
-  diagOutputs.innerHTML = "";
-  traceOutput.textContent = PWA_UNAVAILABLE_TEXT;
-  troubleshootOutput.textContent = PWA_UNAVAILABLE_TEXT;
-  assistantOutput.textContent = PWA_UNAVAILABLE_TEXT;
-  finderOutput.textContent = PWA_UNAVAILABLE_TEXT;
-  providerOutput.textContent = "Using Cloudflare speed (default).";
-
-  setTsStatus(tsLocal, null, "Unavailable");
-  setTsStatus(tsInternet, null, "Unavailable");
-  setTsStatus(tsDns, null, "Unavailable");
-  setTsStatus(tsHttp, null, "Unavailable");
-
-  disableBackendButton(traceBtn);
-  disableBackendButton(troubleshootBtn);
-  disableBackendButton(diagBtn);
-  disableBackendButton(assistantRunBtn);
-  disableBackendButton(assistantCopyBtn);
-  disableBackendButton(finderRunBtn);
-  disableBackendButton(finderCopyBtn);
-  disableBackendButton(providerBtn);
 }
 
 function setPhase(text) {
@@ -511,7 +365,6 @@ async function runTest() {
       up: toNumber(upValue.textContent),
       quality: summaryQuality.querySelector(".summary-text")?.textContent || "",
     });
-    runAutoDiagnosis();
   } catch (err) {
     if (err.name !== "AbortError") {
       setPhase("Test error");
@@ -526,96 +379,15 @@ async function runTest() {
   }
 }
 
-async function loadInfo() {
-  if (!BACKEND_ENABLED) {
-    systemValue.textContent = PWA_UNAVAILABLE_TEXT;
-    ipValue.textContent = PWA_UNAVAILABLE_TEXT;
-    ispValue.textContent = PWA_UNAVAILABLE_TEXT;
-    return;
-  }
-  try {
-    const res = await fetch("/info", { cache: "no-store" });
-    const data = await res.json();
-    systemValue.textContent = `${data.hostname} • ${data.platform}`;
-    ipValue.textContent =
-      data.localIPs && data.localIPs.length
-        ? data.localIPs.map((ip) => `${ip.name}: ${ip.address}`).join(", ")
-        : "—";
-    ispValue.textContent = data.ispName || "Unavailable locally";
-  } catch (err) {
-    systemValue.textContent = "—";
-    ipValue.textContent = "—";
-    ispValue.textContent = "—";
-  }
-}
-
 async function loadPublicIp() {
   try {
-    const res = await fetch(BACKEND_ENABLED ? "/public-ip" : PUBLIC_IP_ENDPOINT, {
-      cache: "no-store",
-    });
+    const res = await fetch(PUBLIC_IP_ENDPOINT, { cache: "no-store" });
     const data = await res.json();
     publicIpValue.textContent = data.ip || "—";
     summaryPublicIp.textContent = data.ip || "—";
   } catch (err) {
     publicIpValue.textContent = "—";
     summaryPublicIp.textContent = "—";
-  }
-}
-
-async function loadNetInfo() {
-  if (!BACKEND_ENABLED) {
-    netinfoOutput.textContent = PWA_UNAVAILABLE_TEXT;
-    return;
-  }
-  try {
-    const res = await fetch("/netinfo", { cache: "no-store" });
-    const data = await res.json();
-    const sections = [];
-    for (const [name, text] of Object.entries(data)) {
-      if (!text) continue;
-      sections.push(`[${name}]`);
-      sections.push(text.trim());
-      sections.push("");
-    }
-    netinfoOutput.textContent = sections.join("\n");
-  } catch (err) {
-    netinfoOutput.textContent = "Unavailable";
-  }
-}
-
-async function runTrace() {
-  if (!BACKEND_ENABLED) {
-    traceOutput.textContent = PWA_UNAVAILABLE_TEXT;
-    return;
-  }
-  const host = traceHost.value.trim();
-  if (!host) return;
-  traceBtn.disabled = true;
-  traceOutput.textContent = "Running...";
-  try {
-    const hops = Math.max(5, Math.min(Number(traceHops.value) || 20, 40));
-    const timeout = Math.max(500, Math.min(Number(traceTimeout.value) || 2000, 5000));
-    const res = await fetch(
-      `/trace?host=${encodeURIComponent(host)}&hops=${hops}&timeout=${timeout}`,
-      { cache: "no-store" }
-    );
-    const text = await res.text();
-    traceOutput.textContent = text || "—";
-  } catch (err) {
-    traceOutput.textContent = "Traceroute error";
-  } finally {
-    traceBtn.disabled = false;
-  }
-}
-
-function setTsStatus(el, ok, text) {
-  const status = el.querySelector(".ts-status");
-  status.textContent = text;
-  if (ok === null) {
-    el.style.borderColor = "rgba(250, 204, 21, 0.5)";
-  } else {
-    el.style.borderColor = ok ? "rgba(34, 197, 94, 0.45)" : "rgba(248, 113, 113, 0.45)";
   }
 }
 
@@ -657,131 +429,6 @@ function updateSummary() {
   text.textContent = label;
   dot.style.background = color;
   dot.style.boxShadow = `0 0 12px ${color}`;
-}
-
-async function runAutoDiagnosis() {
-  setStatus(autoDiagStatus, "Analyzing...", "out-warn");
-  autoDiagList.innerHTML = "";
-  const ping = toNumber(pingValue.textContent);
-  const jitter = toNumber(jitterValue.textContent);
-  const down = toNumber(downValue.textContent);
-  const up = toNumber(upValue.textContent);
-
-  const burst = await quickPingBurst(6).catch(() => null);
-  const troubleshoot = BACKEND_ENABLED
-    ? await fetch("/troubleshoot", { cache: "no-store" }).then((r) => r.json()).catch(() => null)
-    : null;
-  const latency = BACKEND_ENABLED
-    ? await fetch("/latency", { cache: "no-store" }).then((r) => r.json()).catch(() => null)
-    : null;
-
-  const findings = [];
-  const hints = [];
-  const localOk = troubleshoot?.local?.ok;
-  const internetOk = troubleshoot?.internet?.ok;
-  const dnsOk = troubleshoot?.dns?.ok;
-
-  if (localOk === false) {
-    findings.push("Local gateway connectivity is unstable.");
-    hints.push("Verify Wi‑Fi signal or Ethernet link, then reconnect.");
-  }
-  if (internetOk === false) {
-    findings.push("ISP/WAN connectivity appears unavailable.");
-    hints.push("Restart modem/router and check ISP outage status.");
-  }
-  if (dnsOk === false) {
-    findings.push("DNS resolution is failing.");
-    hints.push("Switch DNS to 1.1.1.1 or 8.8.8.8 and re-test.");
-  }
-  if (burst && burst.loss > 0) {
-    findings.push("Packet loss detected during burst checks.");
-    hints.push("Use Ethernet or reduce Wi‑Fi interference.");
-  }
-  if (Number.isFinite(ping) && ping > 80) {
-    findings.push("Elevated latency detected.");
-    hints.push("Use Ethernet or move closer to the router.");
-  }
-  if (Number.isFinite(jitter) && jitter > 25) {
-    findings.push("Jitter is elevated (latency instability).");
-    hints.push("Reduce background traffic and improve Wi‑Fi signal quality.");
-  }
-  if (Number.isFinite(down) && down < 10) {
-    findings.push("Download throughput is low.");
-    hints.push("Pause heavy traffic and re-test on Ethernet.");
-  }
-  if (Number.isFinite(up) && up < 3) {
-    findings.push("Upload throughput is low.");
-    hints.push("Re-test during off‑peak hours or on Ethernet.");
-  }
-  if (burst && burst.loss > 0) {
-    findings.push(`Packet loss detected (${formatLoss(burst.loss, burst.total)}).`);
-    hints.push("Switch to Ethernet or reduce Wi‑Fi interference.");
-  }
-  if (latency?.targets?.length) {
-    const slow = latency.targets.find((t) => t.ok && t.ms > 200);
-    if (slow) {
-      findings.push(`High HTTP latency to ${slow.name}.`);
-      hints.push("Possible congestion or ISP routing inefficiency.");
-    }
-  }
-
-  if (!findings.length) {
-    findings.push("No obvious issues detected.");
-    hints.push("If issues persist, re-test on Ethernet.");
-  }
-
-  const localLabel = BACKEND_ENABLED
-    ? localOk === false
-      ? "Issue detected"
-      : localOk === true
-        ? "OK"
-        : "Unknown"
-    : "Unavailable";
-  const ispLabel = BACKEND_ENABLED
-    ? internetOk === false
-      ? "Issue detected"
-      : internetOk === true
-        ? "OK"
-        : "Unknown"
-    : "Unavailable";
-  setStatus(
-    localStatus,
-    localLabel,
-    BACKEND_ENABLED
-      ? localOk === false
-        ? "out-bad"
-        : localOk === true
-          ? "out-ok"
-          : "out-warn"
-      : "out-warn"
-  );
-  setStatus(
-    ispStatus,
-    ispLabel,
-    BACKEND_ENABLED
-      ? internetOk === false
-        ? "out-bad"
-        : internetOk === true
-          ? "out-ok"
-          : "out-warn"
-      : "out-warn"
-  );
-  splitHint.textContent = BACKEND_ENABLED
-    ? localOk === false
-      ? "Local network is the bottleneck."
-      : internetOk === false
-        ? "ISP/WAN is the likely bottleneck."
-        : "No clear bottleneck detected."
-    : "Local/ISP split needs a server in PWA mode.";
-
-  const level = findings[0] === "No obvious issues detected." ? "out-ok" : "out-bad";
-  setStatus(autoDiagStatus, findings[0], level);
-  hints.forEach((text) => {
-    const item = document.createElement("div");
-    item.className = "diag-list-item";
-    item.textContent = text;
-    autoDiagList.append(item);
-  });
 }
 
 function setMonitorStatus(text, color) {
@@ -874,29 +521,6 @@ function fetchWithTimeout(url, timeoutMs) {
     });
 }
 
-async function quickPingBurst(samples = 6) {
-  let loss = 0;
-  let total = 0;
-  let sum = 0;
-  for (let i = 0; i < samples; i += 1) {
-    total += 1;
-    const start = performance.now();
-    try {
-      const res = await fetchWithTimeout(remoteUrl("/__down", { bytes: PING_BYTES, i }), 2500);
-      await res.arrayBuffer();
-      sum += performance.now() - start;
-    } catch {
-      loss += 1;
-    }
-  }
-  const okCount = total - loss;
-  return {
-    loss,
-    total,
-    avg: okCount ? sum / okCount : NaN,
-  };
-}
-
 async function monitorTick() {
   monitorTotal += 1;
   const start = performance.now();
@@ -937,447 +561,20 @@ function stopMonitor() {
   setMonitorStatus("Stopped", "rgba(148, 163, 184, 0.5)");
 }
 
-function pickSuggestions(context) {
-  const steps = [];
-  if (context.symptom === "single-device") {
-    steps.push("Compare with another device on the same network.");
-    steps.push("Reset the network adapter or reconnect to Wi‑Fi.");
-  }
-  if (!context.localOk) {
-    steps.push("Verify router power/cabling or Wi‑Fi link, then reconnect.");
-    steps.push("Confirm the device has a valid IP address.");
-  } else if (context.internetOk === false) {
-    steps.push("Restart modem/router and check ISP outage status.");
-    steps.push("Verify WAN/PPPoE credentials if applicable.");
-  }
-  if (context.dnsOk === false) {
-    steps.push("Switch DNS to a public resolver (1.1.1.1 or 8.8.8.8).");
-    steps.push("Flush DNS cache or restart the device.");
-  }
-  if (context.httpOk === false && context.internetOk !== false) {
-    steps.push("Check for a captive portal or proxy requirements.");
-  }
-  if (context.latencyWarn) {
-    steps.push("Prefer Ethernet or reduce Wi‑Fi interference.");
-  }
-  if (context.symptom === "slow") {
-    steps.push("Pause large transfers and re-test.");
-    steps.push("Compare Wi‑Fi vs wired performance.");
-  }
-  if (context.symptom === "drops") {
-    steps.push("Reduce Wi‑Fi interference and check channel congestion.");
-  }
-  if (!steps.length) {
-    steps.push("No actionable issue detected; re-test at a different time.");
-  }
-  return steps;
-}
-
-async function runAssistant() {
-  if (!BACKEND_ENABLED) {
-    renderLines(assistantOutput, [PWA_UNAVAILABLE_TEXT]);
-    return;
-  }
-  assistantRunBtn.disabled = true;
-  assistantCopyBtn.disabled = true;
-  renderLines(assistantOutput, ["Running assistant..."]);
-  try {
-    const host = assistantHost.value.trim() || "cloudflare.com";
-    const burst = await quickPingBurst();
-    const [troubleshoot, summary, publicIp, dnsTest, latency] = await Promise.all([
-      fetch("/troubleshoot", { cache: "no-store" }).then((r) => r.json()),
-      fetch("/summary", { cache: "no-store" }).then((r) => r.json()),
-      fetch("/public-ip", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})),
-      fetch(`/dns-test?host=${encodeURIComponent(host)}`, { cache: "no-store" })
-        .then((r) => r.json())
-        .catch(() => null),
-      fetch("/latency", { cache: "no-store" }).then((r) => r.json()).catch(() => null),
-    ]);
-
-    const localOk = troubleshoot?.local?.ok;
-    const internetOk = troubleshoot?.internet?.ok;
-    const dnsOk = troubleshoot?.dns?.ok;
-    const httpOk = troubleshoot?.http?.ok;
-    const latencyWarn =
-      latency &&
-      Array.isArray(latency.targets) &&
-      latency.targets.some((t) => t.ok && t.ms > 180);
-
-    const symptom = assistantSymptom.value;
-    const likely = [];
-    if (symptom === "no-internet") {
-      if (localOk === false) likely.push("Local gateway unreachable from this device.");
-      else if (internetOk === false) likely.push("ISP/WAN connectivity failure.");
-      else if (httpOk === false) likely.push("HTTP blocked or captive portal detected.");
-    }
-    if (symptom === "dns" && dnsOk === false) {
-      likely.push("DNS resolution failing on this device.");
-    }
-    if (symptom === "slow" && latencyWarn) {
-      likely.push("Elevated latency detected; possible congestion or weak Wi‑Fi.");
-    }
-    if (symptom === "drops" && burst.loss > 0) {
-      likely.push("Packet loss observed in quick burst checks.");
-    }
-    if (!likely.length) {
-      likely.push("No clear fault detected from automated checks.");
-    }
-
-    const steps = pickSuggestions({
-      localOk,
-      internetOk,
-      dnsOk,
-      httpOk,
-      latencyWarn,
-      symptom,
-    });
-
-    const lines = [];
-    lines.push(`Symptom: ${assistantSymptom.options[assistantSymptom.selectedIndex].text}`);
-    lines.push(`Gateway: ${summary.gateway || troubleshoot.gateway || "—"}`);
-    lines.push(`Public IP: ${publicIp.ip || "—"}`);
-    lines.push(`DNS servers: ${
-      summary.dnsServers && summary.dnsServers.length ? summary.dnsServers.join(", ") : "—"
-    }`);
-    lines.push(
-      `Quick ping: ${Number.isFinite(burst.avg) ? `${formatMs(burst.avg)} ms avg` : "—"} • loss ${
-        burst.total ? `${Math.round((burst.loss / burst.total) * 100)}%` : "—"
-      }`
-    );
-    if (dnsTest) {
-      lines.push(`DNS test (${dnsTest.host}): ${
-        dnsTest.v4.ok || dnsTest.v6.ok ? "OK" : "Error"
-      }`);
-      if (dnsTest.v4.addresses?.length) lines.push(`- A: ${dnsTest.v4.addresses.join(", ")}`);
-      if (dnsTest.v6.addresses?.length) lines.push(`- AAAA: ${dnsTest.v6.addresses.join(", ")}`);
-      if (dnsTest.v4.error) lines.push(`- A error: ${dnsTest.v4.error}`);
-      if (dnsTest.v6.error) lines.push(`- AAAA error: ${dnsTest.v6.error}`);
-    }
-    lines.push("");
-    lines.push("Likely causes:");
-    likely.forEach((item) => lines.push(`- ${item}`));
-    lines.push("");
-    lines.push("Recommended actions:");
-    steps.forEach((item, idx) => lines.push(`${idx + 1}. ${item}`));
-    if (latency && latency.targets?.length) {
-      lines.push("");
-      lines.push("Latency probes:");
-      latency.targets.forEach((t) => {
-        lines.push(`- ${t.name}: ${t.ok ? `${t.ms} ms` : `error (${t.error || "fail"})`}`);
-      });
-    }
-    renderLines(assistantOutput, lines);
-    assistantCopyBtn.disabled = false;
-  } catch (err) {
-    renderLines(assistantOutput, ["Assistant failed to run."]);
-  } finally {
-    assistantRunBtn.disabled = false;
-  }
-}
-
-function formatLoss(loss, total) {
-  if (!total) return "—";
-  return `${Math.round((loss / total) * 100)}%`;
-}
-
-async function runIssueFinder() {
-  if (!BACKEND_ENABLED) {
-    renderLines(finderOutput, [PWA_UNAVAILABLE_TEXT]);
-    return;
-  }
-  finderRunBtn.disabled = true;
-  finderCopyBtn.disabled = true;
-  renderLines(finderOutput, ["Running universal checks..."]);
-  try {
-    const host = finderHost.value.trim() || "cloudflare.com";
-    const [summary, troubleshoot, publicIp, dnsTest, latency, burst, icmp] = await Promise.all([
-      fetch("/summary", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})),
-      fetch("/troubleshoot", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})),
-      fetch("/public-ip", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})),
-      fetch(`/dns-test?host=${encodeURIComponent(host)}`, { cache: "no-store" })
-        .then((r) => r.json())
-        .catch(() => null),
-      fetch("/latency", { cache: "no-store" }).then((r) => r.json()).catch(() => null),
-      quickPingBurst(8).catch(() => null),
-      fetch(`/icmp?host=${encodeURIComponent(host)}`, { cache: "no-store" })
-        .then((r) => r.json())
-        .catch(() => null),
-    ]);
-
-    const localOk = troubleshoot?.local?.ok;
-    const internetOk = troubleshoot?.internet?.ok;
-    const dnsOk = troubleshoot?.dns?.ok;
-    const httpOk = troubleshoot?.http?.ok;
-    const issues = [];
-    const actions = [];
-
-    if (localOk === false) {
-      issues.push("Local gateway unreachable (Wi‑Fi or cable issue).");
-      actions.push("Verify Wi‑Fi signal or Ethernet link, then reconnect.");
-    }
-    if (internetOk === false) {
-      issues.push("ISP/WAN connectivity failure.");
-      actions.push("Restart modem/router and check ISP outages.");
-    }
-    if (dnsOk === false) {
-      issues.push("DNS resolution failing.");
-      actions.push("Switch DNS to 1.1.1.1 or 8.8.8.8 and retry.");
-    }
-    if (httpOk === false && internetOk !== false) {
-      issues.push("HTTP access blocked or captive portal.");
-      actions.push("Check captive portal or proxy/VPN configuration.");
-    }
-    if (burst && burst.loss > 0) {
-      issues.push(`Packet loss detected (${formatLoss(burst.loss, burst.total)}).`);
-      actions.push("Use Ethernet or reduce Wi‑Fi interference.");
-    }
-    if (burst && Number.isFinite(burst.avg) && burst.avg > 120) {
-      issues.push("Elevated latency to the edge detected.");
-      actions.push("Use a wired connection or improve Wi‑Fi signal quality.");
-    }
-    if (latency?.targets?.length) {
-      const slow = latency.targets.find((t) => t.ok && t.ms > 220);
-      if (slow) {
-        issues.push(`High HTTP latency to ${slow.name}.`);
-        actions.push("Possible ISP routing or congestion issue.");
-      }
-    }
-
-    if (!issues.length) {
-      issues.push("No obvious issues detected.");
-      actions.push("If issues persist, test on Ethernet or re-run later.");
-    }
-
-    const lines = [];
-    lines.push("Issue Finder Report");
-    lines.push("===================");
-    lines.push(`Host: ${host}`);
-    lines.push(`Public IP: ${publicIp.ip || "—"}`);
-    lines.push(`Gateway: ${summary.gateway || troubleshoot.gateway || "—"}`);
-    lines.push(`DNS servers: ${
-      summary.dnsServers && summary.dnsServers.length ? summary.dnsServers.join(", ") : "—"
-    }`);
-    if (burst) {
-      lines.push(
-        `Burst ping: ${
-          Number.isFinite(burst.avg) ? `${formatMs(burst.avg)} ms avg` : "—"
-        } • loss ${formatLoss(burst.loss, burst.total)}`
-      );
-    }
-    if (dnsTest) {
-      lines.push(`DNS test (${dnsTest.host}): ${
-        dnsTest.v4.ok || dnsTest.v6.ok ? "OK" : "Error"
-      }`);
-    }
-    if (icmp && Number.isFinite(icmp.avgMs)) {
-      lines.push(`ICMP avg: ${Math.round(icmp.avgMs)} ms`);
-      summaryIcmp.textContent = `${Math.round(icmp.avgMs)} ms`;
-    } else if (icmp && icmp.error) {
-      lines.push(`ICMP: ${icmp.error}`);
-      summaryIcmp.textContent = "Unavailable";
-    }
-    if (latency?.targets?.length) {
-      lines.push("HTTP latency:");
-      latency.targets.forEach((t) => {
-        lines.push(`- ${t.name}: ${t.ok ? `${t.ms} ms` : `error (${t.error || "fail"})`}`);
-      });
-    }
-    lines.push("");
-    lines.push("Likely issues:");
-    issues.forEach((item) => lines.push(`- ${item}`));
-    lines.push("");
-    lines.push("Recommended actions:");
-    actions.forEach((item, idx) => lines.push(`${idx + 1}. ${item}`));
-
-    renderLines(finderOutput, lines);
-    finderCopyBtn.disabled = false;
-  } catch (err) {
-    renderLines(finderOutput, ["Issue Finder failed to run."]);
-  } finally {
-    finderRunBtn.disabled = false;
-  }
-}
-
-async function runProviderCheck() {
-  if (!BACKEND_ENABLED) {
-    latencyProvider = { name: "Cloudflare speed (default)", url: LATENCY_FALLBACK_URL };
-    providerOutput.textContent = "Using Cloudflare speed (default).";
-    return;
-  }
-  providerBtn.disabled = true;
-  providerOutput.textContent = "Checking providers...";
-  try {
-    const res = await fetch("/provider-check", { cache: "no-store" });
-    const data = await res.json();
-    if (!Array.isArray(data.providers) || !data.providers.length) {
-      providerOutput.textContent = "No provider data available.";
-      return;
-    }
-    const best = data.providers.find((p) => p.ok && p.cors) || data.providers[0];
-    if (best?.ok && best?.cors) {
-      latencyProvider = { name: best.name, url: best.url };
-    } else {
-      latencyProvider = { name: "Cloudflare speed (default)", url: LATENCY_FALLBACK_URL };
-      updateSummary();
-    }
-    const lines = data.providers.map((p, idx) => {
-      const label = `${p.name}: ${p.ok ? `${p.ms} ms` : "error"}${p.cors ? "" : " (no CORS)"}`;
-      return p === best ? `Best: ${label}` : `- ${label}`;
-    });
-    providerOutput.textContent = lines.join("\n");
-  } catch (err) {
-    providerOutput.textContent = "Provider check failed.";
-  } finally {
-    providerBtn.disabled = false;
-  }
-}
-
-async function runTroubleshoot() {
-  if (!BACKEND_ENABLED) {
-    renderLines(troubleshootOutput, [PWA_UNAVAILABLE_TEXT]);
-    setTsStatus(tsLocal, null, "Unavailable");
-    setTsStatus(tsInternet, null, "Unavailable");
-    setTsStatus(tsDns, null, "Unavailable");
-    setTsStatus(tsHttp, null, "Unavailable");
-    return;
-  }
-  troubleshootBtn.disabled = true;
-  renderLines(troubleshootOutput, ["Running checks..."]);
-  setTsStatus(tsLocal, true, "Checking...");
-  setTsStatus(tsInternet, true, "Checking...");
-  setTsStatus(tsDns, true, "Checking...");
-  setTsStatus(tsHttp, true, "Checking...");
-  try {
-    const res = await fetch("/troubleshoot", { cache: "no-store" });
-    const data = await res.json();
-    setTsStatus(tsLocal, data.local.ok, data.local.label);
-    setTsStatus(tsInternet, data.internet.ok, data.internet.label);
-    setTsStatus(tsDns, data.dns.ok, data.dns.label);
-    setTsStatus(tsHttp, data.http.ok, data.http.label);
-    const blocks = [];
-    blocks.push(`[gateway] ${data.gateway || "—"}`);
-    blocks.push("");
-    blocks.push("[local]");
-    blocks.push((data.local.output || "").trim());
-    blocks.push("");
-    blocks.push("[internet]");
-    blocks.push((data.internet.output || "").trim());
-    blocks.push("");
-    blocks.push("[dns]");
-    blocks.push((data.dns.output || "").trim());
-    blocks.push("");
-    blocks.push("[http]");
-    blocks.push((data.http.output || "").trim());
-    renderLines(troubleshootOutput, blocks);
-  } catch (err) {
-    renderLines(troubleshootOutput, ["Checks failed"]);
-    setTsStatus(tsLocal, false, "Error");
-    setTsStatus(tsInternet, false, "Error");
-    setTsStatus(tsDns, false, "Error");
-    setTsStatus(tsHttp, false, "Error");
-  } finally {
-    troubleshootBtn.disabled = false;
-  }
-}
-
-function renderDiagOutputs(outputs) {
-  diagOutputs.innerHTML = "";
-  const entries = Object.values(outputs || {});
-  entries.forEach((item) => {
-    const block = document.createElement("div");
-    block.className = "diag-block";
-    const title = document.createElement("div");
-    title.className = "diag-title";
-    title.textContent = item.label || "Output";
-    const pre = document.createElement("pre");
-    pre.className = "diag-pre";
-    const lines = (item.output || "—").split(/\r?\n/);
-    renderLines(pre, lines);
-    block.append(title, pre);
-    diagOutputs.append(block);
-  });
-}
-
-async function runDiag() {
-  if (!BACKEND_ENABLED) {
-    diagStatus.textContent = PWA_UNAVAILABLE_TEXT;
-    return;
-  }
-  diagBtn.disabled = true;
-  diagStatus.textContent = "Collecting...";
-  try {
-    const res = await fetch("/diag", { cache: "no-store" });
-    const data = await res.json();
-    diagGateway.textContent = data.summary.gateway || "—";
-    diagDns.textContent =
-      data.summary.dnsServers && data.summary.dnsServers.length
-        ? data.summary.dnsServers.join(", ")
-        : "—";
-    diagIfaces.textContent =
-      data.summary.interfaces && data.summary.interfaces.length
-        ? data.summary.interfaces
-            .map((i) => `${i.name} ${i.address} ${i.family} ${i.mac}`)
-            .join(" | ")
-        : "—";
-    renderDiagOutputs(data.outputs);
-    diagStatus.textContent = "Done";
-  } catch (err) {
-    diagStatus.textContent = "Error";
-  } finally {
-    diagBtn.disabled = false;
-  }
-}
-
-async function loadSummary() {
-  if (!BACKEND_ENABLED) {
-    summaryGateway.textContent = PWA_UNAVAILABLE_TEXT;
-    summaryDns.textContent = PWA_UNAVAILABLE_TEXT;
-    return;
-  }
-  try {
-    const res = await fetch("/summary", { cache: "no-store" });
-    const data = await res.json();
-    summaryGateway.textContent = data.gateway || "—";
-    summaryDns.textContent =
-      data.dnsServers && data.dnsServers.length ? data.dnsServers.join(", ") : "—";
-  } catch {
-    summaryGateway.textContent = "—";
-    summaryDns.textContent = "—";
-  }
-}
-
 startBtn.addEventListener("click", runTest);
 stopBtn.addEventListener("click", () => {
   if (aborter) aborter.abort();
 });
 monitorStartBtn.addEventListener("click", startMonitor);
 monitorStopBtn.addEventListener("click", stopMonitor);
-if (BACKEND_ENABLED) {
-  traceBtn.addEventListener("click", runTrace);
-  troubleshootBtn.addEventListener("click", runTroubleshoot);
-  diagBtn.addEventListener("click", runDiag);
-  assistantRunBtn.addEventListener("click", runAssistant);
-  assistantCopyBtn.addEventListener("click", () => {
-    if (!assistantOutput.textContent || assistantOutput.textContent === "—") return;
-    navigator.clipboard.writeText(assistantOutput.textContent).catch(() => {});
-  });
-  finderRunBtn.addEventListener("click", runIssueFinder);
-  finderCopyBtn.addEventListener("click", () => {
-    if (!finderOutput.textContent || finderOutput.textContent === "—") return;
-    navigator.clipboard.writeText(finderOutput.textContent).catch(() => {});
-  });
-  providerBtn.addEventListener("click", runProviderCheck);
-  loadInfo();
-  loadNetInfo();
-  loadSummary();
-  runProviderCheck();
-} else {
-  applyPurePwaMode();
-}
 loadPublicIp();
 updateSummary();
 setMonitorStatus("Idle", "rgba(148, 163, 184, 0.5)");
 renderHistory();
+
+if (footerNote) {
+  footerNote.textContent = "PWA mode: speed test uses Cloudflare edge.";
+}
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
